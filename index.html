@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>Popping Tok - 팝핑톡</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="app">
+      <!-- Screen 5: Onboarding -->
+      <section id="screen-onboarding" class="screen onboarding">
+        <div class="onboarding__slides">
+          <div class="slide">
+            <div class="slide__emoji">🌱</div>
+            <h2 class="slide__title">작은 습관이<br />큰 변화를 만들어요</h2>
+            <p class="slide__desc">팝핑톡과 함께 매일 조금씩 성장해요</p>
+          </div>
+        </div>
+        <div class="onboarding__footer">
+          <div class="onboarding__dots">
+            <div class="onboarding__dot onboarding__dot--active"></div>
+            <div class="onboarding__dot"></div>
+            <div class="onboarding__dot"></div>
+          </div>
+          <button id="btn-start" class="button--primary onboarding__start-btn">
+            시작하기
+          </button>
+          <button id="btn-skip" class="onboarding__skip-link">건너뛰기</button>
+        </div>
+      </section>
+
+      <!-- Screen 1: Home -->
+      <main id="screen-home" class="screen home">
+        <header class="home__header">
+          <div class="service-logo">팝핑톡톡</div>
+          <div id="home-date" class="home__date">2026년 3월 11일 수요일</div>
+          <h1 class="home__title">
+            안녕하세요, 성은님! 👋<br />오늘도 팝핑하게!
+          </h1>
+        </header>
+
+        <article class="point-card">
+          <div class="point-card__info">
+            <p class="point-card__label">총 포인트</p>
+            <h2 class="point-card__total">1,250P</h2>
+            <p class="point-card__today">오늘 획득 <span>+100P</span> ⚡</p>
+          </div>
+          <button class="point-card__shop-btn">포인트 샵 →</button>
+        </article>
+
+        <aside class="streak">
+          <div class="streak__text">
+            <span class="streak__count">3일</span> 연속 달성!
+            <p class="streak__sub">내일도 이어가면 뱃지 획득</p>
+          </div>
+          <div class="streak__badge">🔥</div>
+        </aside>
+
+        <section class="progress">
+          <div class="progress__header">
+            <span class="progress__label">오늘의 달성률</span>
+            <span class="progress__counter">3 / 4 완료</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-bar__fill" style="width: 75%"></div>
+          </div>
+          <p class="progress__status">75% · 1개 남았어요 🔔</p>
+        </section>
+
+        <section class="habit-section">
+          <div class="habit-section__header">
+            <h3 class="habit-section__title">오늘의 습관</h3>
+            <button id="btn-delete-mode" class="habit-section__delete-btn">삭제</button>
+          </div>
+          <ul id="habit-list" class="habit-list">
+            <!-- HabitItems will be injected by JS -->
+          </ul>
+        </section>
+
+        <button id="btn-add-habit" class="add-cta">+ 새로운 습관 추가</button>
+      </main>
+
+      <!-- Screen 2: Message -->
+      <section id="screen-message" class="screen message">
+        <header class="message-header">
+          <div class="message-header__top">
+            <span class="service-logo service-logo--white">팝핑톡톡</span>
+            <div class="header-icons">
+              <button class="icon-btn">🔔</button>
+              <button class="icon-btn">⚙️</button>
+            </div>
+          </div>
+          <p class="message-header__subtitle">오늘의 성과</p>
+          <h2 class="message-header__title">
+            우와, 대단해요!<br />성은님, 오늘 모든 습관을 완료했어요! 🥳
+          </h2>
+        </header>
+
+        <section class="character">
+          <div class="character__bubble">
+            "오늘도 정말 잘했어요!<br />내일도 같이 해봐요 ☀️"
+          </div>
+          <div class="character__display">
+            <div class="character__image">
+              <img src="/images/Popping.gif" alt="팝핑이" />
+            </div>
+            <div class="character__name">팝핑이 <span class="en">Popping Character</span></div>
+          </div>
+        </section>
+
+        <div class="message-content">
+          <article class="achievement-card">
+            <div class="achievement-card__item">
+              <span class="achievement-card__value">100%</span>
+              <span class="achievement-card__label">달성률</span>
+            </div>
+            <div class="achievement-card__item">
+              <span class="achievement-card__value">3일</span>
+              <span class="achievement-card__label">연속 달성</span>
+            </div>
+            <div class="achievement-card__item">
+              <span class="achievement-card__value">+100P</span>
+              <span class="achievement-card__label">획득 포인트</span>
+            </div>
+          </article>
+
+          <button class="button--primary achievement-card__share-btn">
+            성취 공유하기
+          </button>
+        </div>
+      </section>
+
+      <!-- Screen 4: Statistics -->
+      <section id="screen-stats" class="screen stats">
+        <header class="stats__header">
+          <div class="stats-header__top">
+            <span class="service-logo">팝핑톡톡</span>
+            <div class="header-icons">
+              <button class="icon-btn">🔔</button>
+              <button class="icon-btn">⚙️</button>
+            </div>
+          </div>
+        </header>
+
+        <nav class="stats-tabs">
+          <button class="stats-tabs__item stats-tabs__item--active">
+            주간 기록
+          </button>
+          <button class="stats-tabs__item">월간 기록</button>
+          <button class="stats-tabs__item">전체 현황</button>
+        </nav>
+
+        <div class="stats-grid">
+          <div class="stats-kpi">
+            <span class="stats-kpi__value">1,250P</span>
+            <span class="stats-kpi__label">총 포인트</span>
+          </div>
+          <div class="stats-kpi">
+            <span class="stats-kpi__value">82%</span>
+            <span class="stats-kpi__label">주간 달성률</span>
+          </div>
+          <div class="stats-kpi">
+            <span class="stats-kpi__value">3일</span>
+            <span class="stats-kpi__label">연속 기록</span>
+          </div>
+        </div>
+
+        <section class="chart-section">
+          <h3 class="chart-section__title">이번 주 달성 현황</h3>
+          <div class="bar-chart">
+            <!-- Bars injected by JS -->
+          </div>
+        </section>
+
+        <section class="heatmap-section">
+          <div class="heatmap-section__header">
+            <h3 class="heatmap-section__title">이번 달 히트맵 <span class="month-label">3월</span></h3>
+          </div>
+          <div class="heatmap">
+            <!-- Cells injected by JS -->
+          </div>
+          <div class="heatmap-legend">
+            <span>진행</span>
+            <div class="heatmap-legend__cells">
+              <div class="heatmap__cell heatmap__cell--partial"></div>
+              <div class="heatmap__cell heatmap__cell--full"></div>
+            </div>
+            <span>완벽</span>
+          </div>
+        </section>
+
+        <section class="habit-rank-section">
+          <div class="section-header">
+            <h3 class="section-header__title">습관별 달성률</h3>
+            <button class="more-btn">더보기</button>
+          </div>
+          <ul id="habit-rank-list" class="habit-rank-list">
+            <!-- Rank items injected by JS -->
+          </ul>
+        </section>
+      </section>
+
+      <!-- Screen: Profile -->
+      <section id="screen-profile" class="screen profile">
+        <header class="profile-header">
+          <div class="profile-header__top">
+            <span class="service-logo">팝핑톡톡</span>
+            <div class="header-icons">
+              <button class="icon-btn">⚙️</button>
+            </div>
+          </div>
+        </header>
+
+        <div class="profile-card">
+          <div class="profile-card__avatar">👤</div>
+          <div class="profile-card__info">
+            <h2 class="profile-card__nickname">성은님</h2>
+            <p class="profile-card__email">seong-eun@vibecoding.com</p>
+          </div>
+          <button class="edit-btn">프로필 수정</button>
+        </div>
+
+        <div class="profile-stats-grid">
+          <div class="profile-stat">
+            <span class="profile-stat__value">1,250</span>
+            <span class="profile-stat__label">보유 포인트</span>
+          </div>
+          <div class="profile-stat">
+            <span class="profile-stat__value">12</span>
+            <span class="profile-stat__label">획득 뱃지</span>
+          </div>
+          <div class="profile-stat">
+            <span class="profile-stat__value">45</span>
+            <span class="profile-stat__label">나의 습관</span>
+          </div>
+        </div>
+
+        <ul class="profile-menu">
+          <li class="profile-menu__item"><span>알림 설정</span> <span>›</span></li>
+          <li class="profile-menu__item"><span>포인트 사용 내역</span> <span>›</span></li>
+          <li class="profile-menu__item"><span>고객센터</span> <span>›</span></li>
+          <li class="profile-menu__item"><span>약관 및 정책</span> <span>›</span></li>
+        </ul>
+      </section>
+
+      <!-- Screen 3: Add Habit (Bottom Sheet Container) -->
+      <div id="add-habit-overlay" class="bottom-sheet-overlay"></div>
+      <section id="add-habit-sheet" class="bottom-sheet">
+        <div class="bottom-sheet__handle"></div>
+        <header class="bottom-sheet__header">
+          <div class="bottom-sheet__character">
+            <img src="/images/Popping.png" alt="대표 캐릭터" />
+          </div>
+          <h2 class="bottom-sheet__title">새 습관 추가</h2>
+          <button id="btn-close-sheet" class="bottom-sheet__close">✕</button>
+        </header>
+
+        <form id="add-habit-form" class="add-form">
+          <div class="add-form__field">
+            <label class="add-form__label">습관 이름</label>
+            <div class="add-form__input-wrapper">
+              <input
+                type="text"
+                id="habit-name"
+                maxlength="20"
+                placeholder="영어 단어 외우기"
+                class="add-form__input"
+              />
+              <span id="char-counter" class="add-form__counter">0/20</span>
+            </div>
+          </div>
+
+          <div class="add-form__field">
+            <label class="add-form__label">카테고리 선택</label>
+            <div class="chip-group" id="category-chips">
+              <button type="button" class="chip" data-value="exercise">
+                💪 운동
+              </button>
+              <button type="button" class="chip" data-value="reading">
+                📖 독서
+              </button>
+              <button type="button" class="chip" data-value="food">
+                🍎 식습관
+              </button>
+              <button type="button" class="chip" data-value="growth">
+                💡 자기계발
+              </button>
+              <button type="button" class="chip" data-value="mind">
+                🧘 마음챙김
+              </button>
+              <button type="button" class="chip" data-value="etc">기타</button>
+            </div>
+          </div>
+
+          <div class="add-form__field">
+            <label class="add-form__label">포인트 설정</label>
+            <div class="chip-group" id="point-chips">
+              <button type="button" class="chip" data-value="5">+5P</button>
+              <button type="button" class="chip chip--selected" data-value="10">
+                +10P
+              </button>
+              <button type="button" class="chip" data-value="15">+15P</button>
+              <button type="button" class="chip" data-value="20">+20P</button>
+            </div>
+          </div>
+
+          <div class="add-form__field">
+            <label class="add-form__label">반복 요일</label>
+            <div class="day-group" id="day-toggles">
+              <button
+                type="button"
+                class="day-toggle day-toggle--selected"
+                data-day="1"
+              >
+                월
+              </button>
+              <button
+                type="button"
+                class="day-toggle day-toggle--selected"
+                data-day="2"
+              >
+                화
+              </button>
+              <button
+                type="button"
+                class="day-toggle day-toggle--selected"
+                data-day="3"
+              >
+                수
+              </button>
+              <button
+                type="button"
+                class="day-toggle day-toggle--selected"
+                data-day="4"
+              >
+                목
+              </button>
+              <button
+                type="button"
+                class="day-toggle day-toggle--selected"
+                data-day="5"
+              >
+                금
+              </button>
+              <button type="button" class="day-toggle" data-day="6">토</button>
+              <button type="button" class="day-toggle" data-day="0">일</button>
+            </div>
+          </div>
+
+          <div class="add-form__field">
+            <label class="add-form__label">알림 시간</label>
+            <input
+              type="time"
+              id="reminder-time"
+              class="add-form__time"
+              value="08:00"
+            />
+          </div>
+
+          <button
+            type="submit"
+            id="btn-save-habit"
+            class="button--primary add-form__submit button--disabled"
+          >
+            습관 저장하기
+          </button>
+        </form>
+      </section>
+
+      <!-- Bottom Navigation -->
+      <nav class="bottom-nav">
+        <button
+          class="bottom-nav__item bottom-nav__item--active"
+          data-screen="home"
+        >
+          <span class="bottom-nav__icon">🏠</span>
+          <span class="bottom-nav__label">홈</span>
+        </button>
+        <button class="bottom-nav__item" data-screen="message">
+          <span class="bottom-nav__icon">💬</span>
+          <span class="bottom-nav__label">메시지</span>
+        </button>
+        <button class="bottom-nav__item" data-screen="stats">
+          <span class="bottom-nav__icon">📊</span>
+          <span class="bottom-nav__label">통계</span>
+        </button>
+        <button class="bottom-nav__item" data-screen="profile">
+          <span class="bottom-nav__icon">👤</span>
+          <span class="bottom-nav__label">프로필</span>
+        </button>
+      </nav>
+    </div>
+
+    <script src="app.js" type="module"></script>
+  </body>
+</html>
