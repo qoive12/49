@@ -16,6 +16,7 @@ let state = {
   },
   currentScreen: "onboarding",
   deleteMode: false,
+  editingHabitId: null,
 };
 
 function loadData() {
@@ -191,6 +192,15 @@ function renderMessage() {
 }
 
 function renderStats() {
+  // Update KPI
+  const statsKpiVal = document.querySelector(
+    ".stats-grid .stats-kpi:nth-child(1) .stats-kpi__value",
+  );
+  if (statsKpiVal) {
+    statsKpiVal.innerText =
+      (state.user.totalPoints || 0).toLocaleString() + "P";
+  }
+
   const barChart = document.querySelector(".bar-chart");
   if (!barChart) return;
 
@@ -219,23 +229,50 @@ function renderStats() {
     const monthLabel = document.querySelector(".month-label");
     if (monthLabel) monthLabel.innerText = monthName;
 
-    // 오늘 포함 주를 기준으로 전주 이번주 다음주 (3주)
-    // Sunday of previous week
-    const start = new Date(today);
-    start.setDate(today.getDate() - today.getDay() - 7);
+    // Month calendar starting from the 1st
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth(); // 0 ~ 11
+    
+    const firstDay = new Date(currentYear, currentMonth, 1);
+    const lastDay = new Date(currentYear, currentMonth + 1, 0);
+    const startDayOfWeek = firstDay.getDay(); // 0: Sun, 1: Mon
+    const totalDays = lastDay.getDate();
 
     const cells = [];
-    for (let i = 0; i < 21; i++) {
-        const d = new Date(start);
-        d.setDate(start.getDate() + i);
-        const isToday = d.toDateString() === today.toDateString();
-        const dateNum = d.getDate();
-        let type = "";
-        if (dateNum % 7 === 0) type = "heatmap__cell--full";
-        else if (dateNum % 3 === 0) type = "heatmap__cell--partial";
-        
-        cells.push(`<div class="heatmap__cell ${type} ${isToday ? 'heatmap__cell--today' : ''}">${dateNum}</div>`);
+    
+    // Day headers
+    const daysArr = ["일", "월", "화", "수", "목", "금", "토"];
+    daysArr.forEach(day => {
+        cells.push(`<div class="heatmap__day-header">${day}</div>`);
+    });
+
+    // Empty cells before the 1st
+    for (let i = 0; i < startDayOfWeek; i++) {
+      cells.push(`<div class="heatmap__cell heatmap__cell--empty"></div>`);
     }
+
+    // Actual dates
+    for (let i = 1; i <= totalDays; i++) {
+      const d = new Date(currentYear, currentMonth, i);
+      const isToday = d.toDateString() === today.toDateString();
+      let type = "";
+      
+      // Mock data logic
+      if (i % 7 === 0) type = "heatmap__cell--full";
+      else if (i % 3 === 0) type = "heatmap__cell--partial";
+
+      cells.push(
+        `<div class="heatmap__cell ${type} ${isToday ? "heatmap__cell--today" : ""}">${i}</div>`,
+      );
+    }
+
+    // Fill remaining cells for 7-column completion
+    const totalCells = startDayOfWeek + totalDays;
+    const remaining = (7 - (totalCells % 7)) % 7;
+    for (let i = 0; i < remaining; i++) {
+        cells.push(`<div class="heatmap__cell heatmap__cell--empty"></div>`);
+    }
+    
     heatmap.innerHTML = cells.join("");
     // Ensure 7 columns grid is maintained in style
   }
@@ -303,8 +340,11 @@ function renderHome() {
       return `
       <li class="habit-item ${isDone ? "habit-item--done" : ""} ${state.deleteMode ? "habit-item--delete-mode" : ""}" data-id="${habit.id}">
         <div class="habit-item__check">${state.deleteMode ? "" : (isDone ? "✓" : "")}</div>
-        <span class="habit-item__name">${habit.name}</span>
-        <span class="habit-item__points">+${habit.points}P</span>
+        <div class="habit-item__content">
+            <span class="habit-item__name">${habit.name}</span>
+            <span class="habit-item__points">+${habit.points}P</span>
+        </div>
+        ${!state.deleteMode ? `<button class="habit-item__edit-btn">✏️</button>` : ''}
       </li>
     `;
     })
@@ -313,7 +353,10 @@ function renderHome() {
   // Update delete button state
   const deleteBtn = document.getElementById("btn-delete-mode");
   if (deleteBtn) {
-    deleteBtn.classList.toggle("habit-section__delete-btn--active", state.deleteMode);
+    deleteBtn.classList.toggle(
+      "habit-section__delete-btn--active",
+      state.deleteMode,
+    );
     deleteBtn.innerText = state.deleteMode ? "완료" : "삭제"; // 텍스트 토글 추가
   }
 
@@ -359,7 +402,11 @@ function handleHabitClick(e) {
   const habitId = parseInt(item.dataset.id);
 
   if (state.deleteMode) {
-    if (confirm(`'${item.querySelector(".habit-item__name").innerText}' 습관을 삭제할까요?`)) {
+    if (
+      confirm(
+        `'${item.querySelector(".habit-item__name").innerText}' 습관을 삭제할까요?`,
+      )
+    ) {
       state.habits = state.habits.filter((h) => h.id !== habitId);
       saveData();
       renderHome();
@@ -368,6 +415,13 @@ function handleHabitClick(e) {
   }
 
   const habit = state.habits.find((h) => h.id === habitId);
+
+  // Check if edit button was clicked
+  if (e.target.closest(".habit-item__edit-btn")) {
+    openEditSheet(habit);
+    return;
+  }
+
   const todayStr = new Date().toISOString().split("T")[0];
   const isDone = habit.completedDates.includes(todayStr);
 
@@ -422,7 +476,7 @@ function triggerPopAnimation(element, points) {
   const fill = document.querySelector(".progress-bar__fill");
   const progRect = progressBar.getBoundingClientRect();
   const fillWidth = fill ? fill.offsetWidth : 0;
-  
+
   // Calculate tip position (right edge of the fill)
   const tipX = progRect.left + fillWidth;
   const centerY = progRect.top + progRect.height / 2;
@@ -447,6 +501,68 @@ function triggerPopAnimation(element, points) {
 
 // --- Sheet Logic ---
 function openAddSheet() {
+  state.editingHabitId = null;
+  const sheetTitle = document.querySelector(".bottom-sheet__title");
+  if (sheetTitle) sheetTitle.innerText = "새 습관 추가";
+  
+  const submitBtn = document.getElementById("btn-save-habit");
+  if (submitBtn) {
+      submitBtn.innerText = "습관 저장하기";
+      submitBtn.classList.add("button--disabled");
+  }
+
+  document.getElementById("add-habit-form").reset();
+  document.getElementById("char-counter").innerText = "0/20";
+
+  // Reset chips and toggles to default
+  document.querySelectorAll("#category-chips .chip").forEach(c => c.classList.remove("chip--selected"));
+  document.querySelector("#category-chips .chip[data-value='etc']")?.classList.add("chip--selected");
+
+  document.querySelectorAll("#point-chips .chip").forEach(c => c.classList.remove("chip--selected"));
+  document.querySelector("#point-chips .chip[data-value='10']")?.classList.add("chip--selected");
+
+  document.querySelectorAll("#day-toggles .day-toggle").forEach(t => t.classList.add("day-toggle--selected"));
+
+  document
+    .getElementById("add-habit-overlay")
+    .classList.add("bottom-sheet-overlay--open");
+  document
+    .getElementById("add-habit-sheet")
+    .classList.add("bottom-sheet--open");
+}
+
+function openEditSheet(habit) {
+  state.editingHabitId = habit.id;
+  
+  const sheetTitle = document.querySelector(".bottom-sheet__title");
+  if (sheetTitle) sheetTitle.innerText = "습관 수정";
+
+  const submitBtn = document.getElementById("btn-save-habit");
+  if (submitBtn) {
+      submitBtn.innerText = "습관 수정하기";
+      submitBtn.classList.remove("button--disabled"); // Enable since it has a name
+  }
+
+  // Populate form
+  document.getElementById("habit-name").value = habit.name;
+  document.getElementById("char-counter").innerText = `${habit.name.length}/20`;
+  document.getElementById("reminder-time").value = habit.reminderTime;
+
+  // Set category chip
+  document.querySelectorAll("#category-chips .chip").forEach(c => {
+      c.classList.toggle("chip--selected", c.dataset.value === habit.category);
+  });
+
+  // Set point chip
+  document.querySelectorAll("#point-chips .chip").forEach(c => {
+      c.classList.toggle("chip--selected", parseInt(c.dataset.value) === habit.points);
+  });
+
+  // Set days toggles
+  document.querySelectorAll("#day-toggles .day-toggle").forEach(t => {
+      t.classList.toggle("day-toggle--selected", habit.repeatDays.includes(parseInt(t.dataset.day)));
+  });
+
   document
     .getElementById("add-habit-overlay")
     .classList.add("bottom-sheet-overlay--open");
@@ -500,9 +616,11 @@ document.addEventListener("DOMContentLoaded", () => {
     renderHome();
   });
 
-  document.querySelector(".point-card__shop-btn").addEventListener("click", () => {
-    alert("포인트 샵은 현재 준비 중입니다! 🎁");
-  });
+  document
+    .querySelector(".point-card__shop-btn")
+    .addEventListener("click", () => {
+      alert("포인트 샵은 현재 준비 중입니다! 🎁");
+    });
 
   document.querySelectorAll(".icon-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -546,24 +664,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    const newHabit = {
-      id: Date.now(),
-      name: nameInput.value,
-      category:
-        document.querySelector("#category-chips .chip--selected")?.dataset
-          .value || "etc",
-      points: parseInt(
-        document.querySelector("#point-chips .chip--selected")?.dataset.value ||
-          "10",
-      ),
-      repeatDays: Array.from(
-        document.querySelectorAll("#day-toggles .day-toggle--selected"),
-      ).map((d) => parseInt(d.dataset.day)),
-      reminderTime: document.getElementById("reminder-time").value,
-      completedDates: [],
-    };
+    
+    // Validate
+    if (nameInput.value.trim().length === 0) return;
 
-    state.habits.push(newHabit);
+    if (state.editingHabitId) {
+        // Edit existing habit
+        const habitIndex = state.habits.findIndex(h => h.id === state.editingHabitId);
+        if (habitIndex > -1) {
+            state.habits[habitIndex] = {
+                ...state.habits[habitIndex],
+                name: nameInput.value,
+                category: document.querySelector("#category-chips .chip--selected")?.dataset.value || "etc",
+                points: parseInt(document.querySelector("#point-chips .chip--selected")?.dataset.value || "10"),
+                repeatDays: Array.from(document.querySelectorAll("#day-toggles .day-toggle--selected")).map((d) => parseInt(d.dataset.day)),
+                reminderTime: document.getElementById("reminder-time").value,
+            };
+        }
+    } else {
+        // Add new habit
+        const newHabit = {
+          id: Date.now(),
+          name: nameInput.value,
+          category: document.querySelector("#category-chips .chip--selected")?.dataset.value || "etc",
+          points: parseInt(document.querySelector("#point-chips .chip--selected")?.dataset.value || "10"),
+          repeatDays: Array.from(document.querySelectorAll("#day-toggles .day-toggle--selected")).map((d) => parseInt(d.dataset.day)),
+          reminderTime: document.getElementById("reminder-time").value,
+          completedDates: [],
+        };
+        state.habits.push(newHabit);
+    }
+
+    state.editingHabitId = null;
     saveData();
     renderHome();
     closeAddSheet();
